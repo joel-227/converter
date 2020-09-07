@@ -1,0 +1,37 @@
+textarea, p {
+  font-family: 'Source Code Pro', monospace;
+  margin: 0;
+}
+
+#navigation-box {
+  margin-top: 60px;
+}
+ 
+#output-box {
+  border: 1px solid black;
+  height: 763px;
+}
+ 
+#input-output-box {
+  display: flex;
+  justify-content: space-between;
+  height: 100vh;
+}
+
+#input, #output {
+  padding: 20px;
+}
+
+#input {
+  width: 100%;
+}
+
+#output p {
+  white-space: pre-wrap;
+}
+
+#button {
+  position: absolute;
+  top: -71px;
+  right: -38px;
+}
