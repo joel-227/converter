@@ -1,9 +1,9 @@
 # Ruby to JS Online Converter (Ongoing project)
 
-# Only basic translation will be provided
+Only basic translation will be provided
 
 
-# puts    => console.log        (done)
-# .class  => typeof()           (done)
-# .to_i   => parseInt(#, 10)    (done)
-# .to_s   => .toString()        (done)
+* puts    => console.log        (done)
+* .class  => typeof()           (done)
+* .to_i   => parseInt(#, 10)    (done)
+* .to_s   => .toString()        (done)
