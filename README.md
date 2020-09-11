@@ -7,3 +7,4 @@ Only basic translation will be provided
 * .class  => typeof()           (done)
 * .to_i   => parseInt(#, 10)    (done)
 * .to_s   => .toString()        (done)
+* variable_definition           (done)
