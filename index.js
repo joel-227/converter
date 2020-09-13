@@ -31,11 +31,10 @@ const getToS = (aInput) => {
 const getCorrectConvention = (match_two) => {
   match_two = match_two.toLowerCase();
   const underscoreRegex = /_/g
-  let underscoreMatch = underscoreRegex.exec(match_two);
-  if (underscoreMatch) {
+  while (underscoreMatch = underscoreRegex.exec(match_two)) {
     underscoreIndex = underscoreMatch.index;
     match_two = match_two.replace(match_two[underscoreIndex + 1], match_two[underscoreIndex + 1].toUpperCase());
-    match_two = match_two.replace('_', "");
+    match_two = match_two.replace("_", "");
   }
   return match_two
 }
@@ -65,16 +64,38 @@ const getVariableDefinition = (aInput) => {
 }
 
 const getVariable = (aInput) => {
-  // possible characters: 
+  // possible characters:
 	// A - Z
 	// a - z
 	// 0 - 9
 	// underscore
-	// whitespace(\t, " ", \n)  (yes)
+	// whitespace(\t, " ", \n, end_of_line)  (yes)
 	// brackets({}, (), [], <>) (yes)
 	// punctuation(,  .  :  ;  " ' ?  /  |  \) (only dot, colon, semi-colon and ?)
 	// operation(+ = -) (yes)
-	// other(! @ # $ % ^ & * ` ~)   (only !, @ if in front)
+  // other(! @ # $ % ^ & * ` ~)   (only !, @ if in front)
+  
+  // variableList = ["my_array", "numbers"]
+
+  const regex = /(\w+)/g;
+  const words = aInput.match(regex);
+  if (words) {
+    words.forEach((word) => {
+      if (variableList.includes(word)) {
+        // word = my_array
+        const regexString = "^(\\s*)(|[\\(\\)\\{\\}\\[\\]\\<\\>]|[\\.\\:\\;\\?]|[+-=!]|puts[\\s|\\(])(" + word + ")(\\s+|$|[\\(\\)\\{\\}\\[\\]\\<\\>]|[\\.\\:\\;\\?]|[+-=!])";
+        const regexTwo = new RegExp(regexString, 'g');
+        let match = regexTwo.exec(aInput);
+        if (match) {        
+          correctedWord = getCorrectConvention(match[3]);
+          aInput = aInput.replace(match[3], correctedWord)
+        }
+      }
+    });
+  }
+
+  return aInput
+
 }
 
 form.addEventListener('submit', (event) => {
@@ -86,9 +107,9 @@ form.addEventListener('submit', (event) => {
     input = getClassToTypeOf(input);
     input = getToInt(input);
     input = getToS(input);
-    input = getPutsToConsoleLog(input);
     input = getVariable(input);
     input = getVariableDefinition(input);
+    input = getPutsToConsoleLog(input);
     output.insertAdjacentHTML('beforeend', `<p>${input}</p>`);
   });
   variableList.length = 0;
