@@ -64,6 +64,18 @@ const getVariableDefinition = (aInput) => {
   // (done) if variable name === allCaps, then use const, otherwise let
 }
 
+const getVariable = (aInput) => {
+  // possible characters: 
+	// A - Z
+	// a - z
+	// 0 - 9
+	// underscore
+	// whitespace(\t, " ", \n)  (yes)
+	// brackets({}, (), [], <>) (yes)
+	// punctuation(,  .  :  ;  " ' ?  /  |  \) (only dot, colon, semi-colon and ?)
+	// operation(+ = -) (yes)
+	// other(! @ # $ % ^ & * ` ~)   (only !, @ if in front)
+}
 
 form.addEventListener('submit', (event) => {
   event.preventDefault();
@@ -75,6 +87,7 @@ form.addEventListener('submit', (event) => {
     input = getToInt(input);
     input = getToS(input);
     input = getPutsToConsoleLog(input);
+    input = getVariable(input);
     input = getVariableDefinition(input);
     output.insertAdjacentHTML('beforeend', `<p>${input}</p>`);
   });
