@@ -20,7 +20,7 @@ const getClassToTypeOf = (aInput) => {
   return getResult(regex, aInput, (match) => `${match[1]}typeof(${match[2]})`);
 }
 const getToInt = (aInput) => {
-  const regex = /(\s*)(".*"|'.*'|\d*|\d+\.\d+)\.to_i\s*/g;
+  const regex = /(\s*)(".*"|'.*'|\w+|\d+\.\d+)\.to_i\s*/g;
   return getResult(regex, aInput, (match) => `${match[1]}parseInt(${match[2]}, 10)`);
 }
 const getToS = (aInput) => {
@@ -46,9 +46,9 @@ const getCorrectConvention = (match_two) => {
 const getVariableDefinition = (aInput) => {
   const regex = /(\s*)(\w+)\s*(=)\s*(.+)/g;
   let match = regex.exec(aInput);
-  console.log(match[2])
   if (match && !variableList.includes(match[2])) {
     variableList.push(match[2]);
+    variableList.push(getCorrectConvention(match[2]));
     if (match[2].toUpperCase() === match[2]) {
       // the variable is a constant      
       match[2] = getCorrectConvention(match[2]);
@@ -105,7 +105,10 @@ const getVariable = (aInput) => {
 
 const getLastElement = (aInput) => {
   // change variable_name[-1] to variable_name[variableName.length - 1]
-  // fix multiple variables 
+  const regex = /(\w+)\[\s*-\s*(\d+)\s*\]/g;
+  while (match = regex.exec(aInput)) {
+    aInput = aInput.replace(match[0], `${match[1]}[${match[1]}.length - ${match[2]}]`)
+  }
   return aInput
 }
 
