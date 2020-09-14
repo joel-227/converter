@@ -29,9 +29,13 @@ const getToS = (aInput) => {
 }
 
 const getCorrectConvention = (match_two) => {
-  match_two = match_two.toLowerCase();
-  const underscoreRegex = /_/g
+  const underscoreRegex = /_/g;
+  let lowerCaseResetCounter = true;
   while (underscoreMatch = underscoreRegex.exec(match_two)) {
+    if (lowerCaseResetCounter) {
+      match_two = match_two.toLowerCase();
+      lowerCaseResetCounter = false;
+    }
     underscoreIndex = underscoreMatch.index;
     match_two = match_two.replace(match_two[underscoreIndex + 1], match_two[underscoreIndex + 1].toUpperCase());
     match_two = match_two.replace("_", "");
@@ -42,6 +46,7 @@ const getCorrectConvention = (match_two) => {
 const getVariableDefinition = (aInput) => {
   const regex = /(\s*)(\w+)\s*(=)\s*(.+)/g;
   let match = regex.exec(aInput);
+  console.log(match[2])
   if (match && !variableList.includes(match[2])) {
     variableList.push(match[2]);
     if (match[2].toUpperCase() === match[2]) {
@@ -83,10 +88,10 @@ const getVariable = (aInput) => {
     words.forEach((word) => {
       if (variableList.includes(word)) {
         // word = my_array
-        const regexString = "^(\\s*)(|[\\(\\)\\{\\}\\[\\]\\<\\>]|[\\.\\:\\;\\?]|[+-=!]|puts[\\s|\\(])(" + word + ")(\\s+|$|[\\(\\)\\{\\}\\[\\]\\<\\>]|[\\.\\:\\;\\?]|[+-=!])";
+        const regexString = "(\\s*)(|[\\(\\)\\{\\}\\[\\]\\<\\>]|[\\.\\:\\;\\?]|[+-=!]|puts[\\s|\\(])(" + word + ")(\\s+|$|[\\(\\)\\{\\}\\[\\]\\<\\>]|[\\.\\:\\;\\?]|[+-=!])";
         const regexTwo = new RegExp(regexString, 'g');
         let match = regexTwo.exec(aInput);
-        if (match) {        
+        if (match) {
           correctedWord = getCorrectConvention(match[3]);
           aInput = aInput.replace(match[3], correctedWord)
         }
@@ -98,6 +103,12 @@ const getVariable = (aInput) => {
 
 }
 
+const getLastElement = (aInput) => {
+  // change variable_name[-1] to variable_name[variableName.length - 1]
+  // fix multiple variables 
+  return aInput
+}
+
 form.addEventListener('submit', (event) => {
   event.preventDefault();
   const input = document.getElementById('input').value;
@@ -107,6 +118,7 @@ form.addEventListener('submit', (event) => {
     input = getClassToTypeOf(input);
     input = getToInt(input);
     input = getToS(input);
+    input = getLastElement(input);
     input = getVariable(input);
     input = getVariableDefinition(input);
     input = getPutsToConsoleLog(input);
