@@ -4,7 +4,7 @@ const output = document.getElementById('output');
 const variableList = [];
 
 const getResult = (regex, aInput, output) => {
-  let match = regex.exec(aInput);  
+  let match = regex.exec(aInput);
   if (match) {
     aInput = aInput.replace(regex, output(match))
   }
@@ -40,7 +40,11 @@ const getCorrectConvention = (match_two) => {
     match_two = match_two.replace(match_two[underscoreIndex + 1], match_two[underscoreIndex + 1].toUpperCase());
     match_two = match_two.replace("_", "");
   }
-  return match_two
+  if (lowerCaseResetCounter === false) {
+    return match_two;
+  } else {
+    return match_two.toLowerCase();
+  }
 }
 
 const getVariableDefinition = (aInput) => {
@@ -50,7 +54,7 @@ const getVariableDefinition = (aInput) => {
     variableList.push(match[2]);
     variableList.push(getCorrectConvention(match[2]));
     if (match[2].toUpperCase() === match[2]) {
-      // the variable is a constant      
+      // the variable is a constant
       match[2] = getCorrectConvention(match[2]);
       aInput = aInput.replace(regex, `${match[1]}const ${match[2]} = ${match[4]}`);     
     } else {
@@ -107,9 +111,58 @@ const getLastElement = (aInput) => {
   // change variable_name[-1] to variable_name[variableName.length - 1]
   const regex = /(\w+)\[\s*-\s*(\d+)\s*\]/g;
   while (match = regex.exec(aInput)) {
-    aInput = aInput.replace(match[0], `${match[1]}[${match[1]}.length - ${match[2]}]`)
+    aInput = aInput.replace(match[0], `${match[1]}[${match[1]}.length - ${match[2]}]`);
   }
-  return aInput
+  return aInput;
+}
+
+const getSubString = (aInput) => {
+  // change variable_name[1...5] to variable_name.substring(1, 5)
+  const regexOne = /(\w+)\[\s*(\d+)\s*\.\.\.\s*(\d*)\s*\]/g;
+  while (match = regexOne.exec(aInput)) {
+    if (parseInt(match[3], 10) > parseInt(match[2], 10)) {
+      let result = match[3].match(/\d+/g);
+      if (result) {
+        aInput = aInput.replace(match[0], `${match[1]}.substring(${match[2]}, ${match[3]})`);
+      } else {
+        aInput = aInput.replace(match[0], `${match[1]}.substring(${match[2]})`);
+      }
+    } else {
+      aInput = aInput.replace(match[0], `${match[1]}.substring(${match[2]}, ${match[2]})`);
+    }
+  }
+  const regexTwo = /(\w+)\[\s*(\d+)\s*\.\.\s*(\d*)\s*\]/g;
+  while (match = regexTwo.exec(aInput)) {
+    if (parseInt(match[3], 10) >= parseInt(match[2], 10)) {
+      let result = match[3].match(/\d+/g);
+      if (result) {
+        aInput = aInput.replace(match[0], `${match[1]}.substring(${match[2]}, ${parseInt(match[3], 10) + 1})`);
+      } else {
+        aInput = aInput.replace(match[0], `${match[1]}.substring(${match[2]})`);
+      }
+    } else {
+      aInput = aInput.replace(match[0], `${match[1]}.substring(${match[2]}, ${match[2]})`);
+    }
+  }
+  return aInput;
+}
+
+const getToUpperCase = (aInput) => {
+  // converts variable_name.upcase   to   variable_name.toUpperCase()
+  const regex = /(\s*)(\S*|".*"\S*|'.*'\S*)\.upcase\s*/g;
+  return getResult(regex, aInput, (match) => `${match[1]}${match[2]}.toUpperCase()`);
+}
+
+const getToLowerCase = (aInput) => {
+  // converts variable_name.upcase   to   variable_name.toUpperCase()
+  const regex = /(\s*)(\S*|".*"\S*|'.*'\S*)\.downcase\s*/g;
+  return getResult(regex, aInput, (match) => `${match[1]}${match[2]}.toLowerCase()`);
+}
+
+const getInterpolation = (aInput) => {
+  const regex = /#{[^}]*}/g;
+
+  return aInput;
 }
 
 form.addEventListener('submit', (event) => {
@@ -119,9 +172,13 @@ form.addEventListener('submit', (event) => {
   const lines = input.split("\n");
   lines.forEach((input) => {
     input = getClassToTypeOf(input);
+    input = getToUpperCase(input);
+    input = getToLowerCase(input);
+    input = getInterpolation(input);
     input = getToInt(input);
     input = getToS(input);
     input = getLastElement(input);
+    input = getSubString(input);
     input = getVariable(input);
     input = getVariableDefinition(input);
     input = getPutsToConsoleLog(input);

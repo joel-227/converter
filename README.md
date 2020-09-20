@@ -9,4 +9,5 @@ Only basic translation will be provided
 * .to_s   => .toString()        (done)
 * variable_definition           (done)
 * variables                     (done)
+* substring                     (done)
 * text overflow
