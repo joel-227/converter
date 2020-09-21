@@ -28,22 +28,25 @@ const getToS = (aInput) => {
   return getResult(regex, aInput, (match) => `${match[1]}(${match[2]}).toString()`);
 }
 
-const getCorrectConvention = (match_two) => {
+const getCorrectConvention = (matchTwo) => {
   const underscoreRegex = /_/g;
   let lowerCaseResetCounter = true;
-  while (underscoreMatch = underscoreRegex.exec(match_two)) {
+  while (underscoreMatch = underscoreRegex.exec(matchTwo)) {
     if (lowerCaseResetCounter) {
-      match_two = match_two.toLowerCase();
+      matchTwo = matchTwo.toLowerCase();
       lowerCaseResetCounter = false;
     }
     underscoreIndex = underscoreMatch.index;
-    match_two = match_two.replace(match_two[underscoreIndex + 1], match_two[underscoreIndex + 1].toUpperCase());
-    match_two = match_two.replace("_", "");
+    // match_two = match_two.replace(match_two[underscoreIndex + 1], match_two[underscoreIndex + 1].toUpperCase());
+    let charArray = matchTwo.split("");
+    charArray[underscoreIndex + 1] = charArray[underscoreIndex + 1].toUpperCase();
+    matchTwo = charArray.join("");
+    matchTwo = matchTwo.replace("_", "");
   }
   if (lowerCaseResetCounter === false) {
-    return match_two;
+    return matchTwo;
   } else {
-    return match_two.toLowerCase();
+    return matchTwo.toLowerCase();
   }
 }
 
@@ -160,9 +163,32 @@ const getToLowerCase = (aInput) => {
 }
 
 const getInterpolation = (aInput) => {
-  const regex = /#{[^}]*}/g;
-
+  const regex = /#{([^}]*)}/g;
+  while (match = regex.exec(aInput)) {
+    aInput = aInput.replace(match[0], "${" + match[1] + "}");
+    aInput = aInput.replace(/"/g, "`");
+  }
   return aInput;
+}
+
+const getPush = (aInput) => {
+  const regex = /(\s*)(\w+)\s*<<\s+(.+)/g;
+  return getResult(regex, aInput, (match) => `${match[1]}${match[2]}.push(${match[3]})`);
+}
+
+const getSplice = (aInput) => {
+  const regex = /(\s*)(\w+)\.delete_at\(\s*(\d+)\s*\)/g;
+  return getResult(regex, aInput, (match) => `${match[1]}${match[2]}.splice(${match[3]}, 1)`);
+}
+
+const getForEach = (aInput) => {
+  const regex = /(\s*)(\w+).each do \|(\w+)\|/g;
+  return getResult(regex, aInput, (match) => `${match[1]}${match[2]}.forEach((${match[3]}) => {`);
+}
+
+const getEndToBracket = (aInput) => {
+  const regex = /(\s*)end/g;
+  return getResult(regex, aInput, (match) => `${match[1]}})`);
 }
 
 form.addEventListener('submit', (event) => {
@@ -174,6 +200,8 @@ form.addEventListener('submit', (event) => {
     input = getClassToTypeOf(input);
     input = getToUpperCase(input);
     input = getToLowerCase(input);
+    input = getPush(input);
+    input = getSplice(input);
     input = getInterpolation(input);
     input = getToInt(input);
     input = getToS(input);
@@ -182,6 +210,8 @@ form.addEventListener('submit', (event) => {
     input = getVariable(input);
     input = getVariableDefinition(input);
     input = getPutsToConsoleLog(input);
+    input = getEndToBracket(input);
+    input = getForEach(input);
     output.insertAdjacentHTML('beforeend', `<p>${input}</p>`);
   });
   variableList.length = 0;
