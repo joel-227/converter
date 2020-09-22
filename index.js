@@ -18,10 +18,13 @@ const getPutsToConsoleLog = (aInput) => {
   return getResult(regex, aInput, (match) => `${match[1]}console.log(${match[2]})`);
 }
 
-
 const getAllToEvery = (aInput) => {
   const regex = /^(\s*)(.*).all\?$/g;
   return getResult(regex, aInput, (match) => `${match[2]}.every()`);
+}
+const getIncludeToIndexOf = (aInput) => {
+  const regex = /^(\s*)(.*).include\?\((.*)\)$/g;
+  return getResult(regex, aInput, (match) => `${match[2]}.indexOf(${match[3]}) != -1`);
 }
 
 const getClassToTypeOf = (aInput) => {
@@ -275,6 +278,7 @@ form.addEventListener('submit', (event) => {
     input = getVariableDefinition(input);
     input = getPutsToConsoleLog(input);
     input = getAllToEvery(input);
+    input = getIncludeToIndexOf(input);
     input = getEndToBracket(input);
     input = getForEach(input);
     input = getIf(input);
