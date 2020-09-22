@@ -2,6 +2,8 @@ const form = document.getElementById('form');
 const output = document.getElementById('output');
 
 const variableList = [];
+const functionParamList = [];
+const blockList = [];
 
 const getResult = (regex, aInput, output) => {
   let match = regex.exec(aInput);
@@ -37,7 +39,7 @@ const getCorrectConvention = (matchTwo) => {
       lowerCaseResetCounter = false;
     }
     underscoreIndex = underscoreMatch.index;
-    // match_two = match_two.replace(match_two[underscoreIndex + 1], match_two[underscoreIndex + 1].toUpperCase());
+    // matchTwo = matchTwo.replace(matchTwo[underscoreIndex + 1], matchTwo[underscoreIndex + 1].toUpperCase());
     let charArray = matchTwo.split("");
     charArray[underscoreIndex + 1] = charArray[underscoreIndex + 1].toUpperCase();
     matchTwo = charArray.join("");
@@ -53,7 +55,8 @@ const getCorrectConvention = (matchTwo) => {
 const getVariableDefinition = (aInput) => {
   const regex = /(\s*)(\w+)\s*(=)\s*(.+)/g;
   let match = regex.exec(aInput);
-  if (match && !variableList.includes(match[2])) {
+  if (match && !variableList.includes(match[2]) && !functionParamList.includes(match[2])) {
+    console.log(variableList);
     variableList.push(match[2]);
     variableList.push(getCorrectConvention(match[2]));
     if (match[2].toUpperCase() === match[2]) {
@@ -183,12 +186,66 @@ const getSplice = (aInput) => {
 
 const getForEach = (aInput) => {
   const regex = /(\s*)(\w+).each do \|(\w+)\|/g;
-  return getResult(regex, aInput, (match) => `${match[1]}${match[2]}.forEach((${match[3]}) => {`);
+  while (match = regex.exec(aInput)) {
+    functionParamList.push(match[3]);
+    blockList.push("{(")
+    aInput = aInput.replace(regex, `${match[1]}${match[2]}.forEach((${match[3]}) => {`)
+  }
+  return aInput;
 }
 
 const getEndToBracket = (aInput) => {
   const regex = /(\s*)end/g;
-  return getResult(regex, aInput, (match) => `${match[1]}})`);
+  while (match = regex.exec(aInput)) {
+    if (blockList[blockList.length - 1] == "{(") {
+      aInput = aInput.replace(regex, `${match[1]}})`);
+    } else {
+      aInput = aInput.replace(regex, `${match[1]}}`);
+    }
+    blockList.pop();
+  }
+  return aInput
+}
+
+const getIf = (aInput) => {
+  const regex = /(\s*)\b(if )(.+)/g;
+  if (match = regex.exec(aInput)) {
+    blockList.push("{")
+    aInput = aInput.replace(regex, `${match[1]}${match[2]}(${match[3]}) {`);
+  }
+  return aInput;
+}
+
+const getElse = (aInput) => {
+  const regex = /(\s*)(else)(\s*)/g;
+  if (match = regex.exec(aInput)) {
+    aInput = aInput.replace(regex, `${match[1]}} ${match[2]} {`)
+  }
+  return aInput;
+}
+
+const getElseIf = (aInput) => {
+  const regex = /(\s*)(elsif )(.+)/g;
+  if (match = regex.exec(aInput)) {
+    aInput = aInput.replace(regex, `${match[1]}} else if (${match[3]}) {`);
+  }
+  return aInput;
+}
+
+const getConditional = (aInput) => {
+  const regex = /(\s*)(==)(\s*)/g;
+  if (match = regex.exec(aInput)) {
+    aInput = aInput.replace(regex, `${match[1]}===${match[3]}`);
+  }
+  return aInput;
+}
+
+const getNilToUndefined = (aInput) => {
+  const regex = /\b(nil)\b/g;
+  if (match = regex.exec(aInput)) {
+    aInput = aInput.replace(regex, `undefined`)
+  }
+  return aInput;
 }
 
 form.addEventListener('submit', (event) => {
@@ -212,6 +269,11 @@ form.addEventListener('submit', (event) => {
     input = getPutsToConsoleLog(input);
     input = getEndToBracket(input);
     input = getForEach(input);
+    input = getIf(input);
+    input = getElse(input);
+    input = getElseIf(input);
+    input = getConditional(input);
+    input = getNilToUndefined(input);
     output.insertAdjacentHTML('beforeend', `<p>${input}</p>`);
   });
   variableList.length = 0;

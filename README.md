@@ -16,5 +16,7 @@ Only basic translation will be provided
 * push                          (done)
 * splice                        (done)
 * forEach, end                  (done)
-* fix multi-line blocks
+* if, else, elsif               (done)
+* conditional                   (done)
+* nil to undefined              (done)
 * text overflow
