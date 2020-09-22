@@ -4,6 +4,7 @@ const output = document.getElementById('output');
 const variableList = [];
 const functionParamList = [];
 const blockList = [];
+const objectList = [];
 
 const getResult = (regex, aInput, output) => {
   let match = regex.exec(aInput);
@@ -65,7 +66,7 @@ const getCorrectConvention = (matchTwo) => {
 const getVariableDefinition = (aInput) => {
   const regex = /(\s*)(\w+)\s*(=)\s*(.+)/g;
   let match = regex.exec(aInput);
-  if (match && !variableList.includes(match[2]) && !functionParamList.includes(match[2])) {
+  if (match && !variableList.includes(match[2]) && !functionParamList.includes(match[2]) && !objectList.includes(match[2])) {
     console.log(variableList);
     variableList.push(match[2]);
     variableList.push(getCorrectConvention(match[2]));
@@ -258,6 +259,35 @@ const getNilToUndefined = (aInput) => {
   return aInput;
 }
 
+const getHashToObject = (aInput) => {
+  // customer = {
+  //   "first" => "joel",
+  //   "last" => "koh"
+  // }
+  
+  const regex = /(\s*)(\w+)\s*=\s*{/g;
+  if (match = regex.exec(aInput)) {
+    objectList.push(match[2]);
+    aInput = aInput.replace(regex, `${match[1]}const ${match[2]} = {`);
+  }
+  return aInput;
+}
+
+const getHashKeyValue = (aInput) => {
+  // hash keys are strings
+  // const regex = /(\s*)"(\w+)"\s*=>\s*(.+)/g;
+  // if (match = regex.exec(aInput)) {
+    // aInput = aInput.replace(regex, `${match[1]}${match[2]}: ${match[3]}`)
+    // if (match[3][0] === "{") {
+  const regexInline = /"(\w+)"\s*=>\s*("[^"]*"|'[^']*'|\[[^]]+\]|\d+\.\d+|\d+|\w+)/g;
+  while (matchInline = regexInline.exec(aInput)) {
+    aInput = aInput.replace(matchInline[0], `${matchInline[1]}: ${matchInline[2]}`);
+  }
+    // }
+  // }
+  return aInput;
+}
+
 form.addEventListener('submit', (event) => {
   event.preventDefault();
   const input = document.getElementById('input').value;
@@ -274,6 +304,8 @@ form.addEventListener('submit', (event) => {
     input = getToS(input);
     input = getLastElement(input);
     input = getSubString(input);
+    input = getHashToObject(input);
+    input = getHashKeyValue(input);
     input = getVariable(input);
     input = getVariableDefinition(input);
     input = getPutsToConsoleLog(input);
