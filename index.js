@@ -43,6 +43,7 @@ const getToS = (aInput) => {
   return getResult(regex, aInput, (match) => `${match[1]}(${match[2]}).toString()`);
 }
 
+
 const getCorrectConvention = (matchTwo) => {
   const underscoreRegex = /_/g;
   let lowerCaseResetCounter = true;
@@ -126,6 +127,15 @@ const getVariable = (aInput) => {
 
 }
 
+const getPowertoPow = (aInput) => {
+  // change a ** b to Math.pow(a, b)
+  const regex = /^(\s*)(.*)(\s*)\*\*(\s*)(.*)$/g;
+  while (match = regex.exec(aInput)) {
+    aInput = aInput.replace(match[0], `Math.pow(${match[2]}, ${match[5]})`);
+  }
+  return aInput;
+}
+
 const getLastElement = (aInput) => {
   // change variable_name[-1] to variable_name[variableName.length - 1]
   const regex = /(\w+)\[\s*-\s*(\d+)\s*\]/g;
@@ -190,6 +200,12 @@ const getInterpolation = (aInput) => {
 const getPush = (aInput) => {
   const regex = /(\s*)(\w+)\s*<<\s+(.+)/g;
   return getResult(regex, aInput, (match) => `${match[1]}${match[2]}.push(${match[3]})`);
+}
+
+
+const getThis = (aInput) => {
+  const regex = /^(\s*)\@(.*)$/g;
+  return getResult(regex, aInput, (match) => `this._(${match[2]})`);
 }
 
 const getSplice = (aInput) => {
@@ -324,6 +340,7 @@ form.addEventListener('submit', (event) => {
     input = getInterpolation(input);
     input = getToInt(input);
     input = getToS(input);
+    input = getThis(input);
     input = getLastElement(input);
     input = getSubString(input);
     input = getHashToObject(input);
@@ -337,6 +354,7 @@ form.addEventListener('submit', (event) => {
     input = getEndToBracket(input);
     input = getForEach(input);
     input = getIf(input);
+    input = getPowertoPow(input);
     input = getElse(input);
     input = getElseIf(input);
     input = getConditional(input);
