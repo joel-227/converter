@@ -5,6 +5,7 @@ const variableList = [];
 const functionParamList = [];
 const blockList = [];
 const objectList = [];
+const functionList = [];
 
 const getResult = (regex, aInput, output) => {
   let match = regex.exec(aInput);
@@ -15,11 +16,12 @@ const getResult = (regex, aInput, output) => {
 }
 
 const getPutsToConsoleLog = (aInput) => {
-  const regex = /^puts (.*)$/g;
+  const regex = /^(\s*)puts (.*)$/g;
   return getResult(regex, aInput, (match) => `${match[1]}console.log(${match[2]})`);
 }
 
 const getAllToEvery = (aInput) => {
+  // need to revise
   const regex = /^(\s*)(.*).all\?$/g;
   return getResult(regex, aInput, (match) => `${match[2]}.every()`);
 }
@@ -66,7 +68,7 @@ const getCorrectConvention = (matchTwo) => {
 const getVariableDefinition = (aInput) => {
   const regex = /(\s*)(\w+)\s*(=)\s*(.+)/g;
   let match = regex.exec(aInput);
-  if (match && !variableList.includes(match[2]) && !functionParamList.includes(match[2]) && !objectList.includes(match[2])) {
+  if (match && !variableList.includes(match[2]) && !functionParamList.includes(match[2]) && !objectList.includes(match[2]) && !functionList.includes(match[2])) {
     console.log(variableList);
     variableList.push(match[2]);
     variableList.push(getCorrectConvention(match[2]));
@@ -279,12 +281,31 @@ const getHashKeyValue = (aInput) => {
   // if (match = regex.exec(aInput)) {
     // aInput = aInput.replace(regex, `${match[1]}${match[2]}: ${match[3]}`)
     // if (match[3][0] === "{") {
-  const regexInline = /"(\w+)"\s*=>\s*("[^"]*"|'[^']*'|\[[^]]+\]|\d+\.\d+|\d+|\w+)/g;
-  while (matchInline = regexInline.exec(aInput)) {
-    aInput = aInput.replace(matchInline[0], `${matchInline[1]}: ${matchInline[2]}`);
+  // backup_regex = "(\w+)"\s*=>\s*("[^"]*"|'[^']*'|\[[^]]+\]|\d+\.\d+|\d+|\w+)
+  while (match = /("\w+"|:\w+)\s*=>\s*/g.exec(aInput)) {
+    key = /(\w+)/g.exec(match[1]);
+    aInput = aInput.replace(match[0], `${key[1]}: `);
   }
     // }
   // }
+  return aInput;
+}
+
+const getCallHash = (aInput) => {
+  while (match = /\[:(\w+)\]/g.exec(aInput)) {
+    aInput = aInput.replace(match[0], `.${match[1]}`);
+  }
+  return aInput
+}
+
+const getFunctionDefinition = (aInput) => {
+  // fix implicit return
+  const regex = /def (\w+)(\([^\)]*\))/g;
+  if (match = regex.exec(aInput)) {
+    functionList.push(match[1]);
+    blockList.push("{");
+    aInput = aInput.replace(match[0], `const ${match[1]} = ${match[2]} => {`);
+  }
   return aInput;
 }
 
@@ -294,6 +315,7 @@ form.addEventListener('submit', (event) => {
   output.innerHTML = "";
   const lines = input.split("\n");
   lines.forEach((input) => {
+    input = getFunctionDefinition(input);
     input = getClassToTypeOf(input);
     input = getToUpperCase(input);
     input = getToLowerCase(input);
@@ -306,6 +328,7 @@ form.addEventListener('submit', (event) => {
     input = getSubString(input);
     input = getHashToObject(input);
     input = getHashKeyValue(input);
+    input = getCallHash(input);
     input = getVariable(input);
     input = getVariableDefinition(input);
     input = getPutsToConsoleLog(input);
