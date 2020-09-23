@@ -202,6 +202,12 @@ const getPush = (aInput) => {
   return getResult(regex, aInput, (match) => `${match[1]}${match[2]}.push(${match[3]})`);
 }
 
+
+const getThis = (aInput) => {
+  const regex = /^(\s*)\@(.*)$/g;
+  return getResult(regex, aInput, (match) => `this._(${match[2]})`);
+}
+
 const getSplice = (aInput) => {
   const regex = /(\s*)(\w+)\.delete_at\(\s*(\d+)\s*\)/g;
   return getResult(regex, aInput, (match) => `${match[1]}${match[2]}.splice(${match[3]}, 1)`);
@@ -334,6 +340,7 @@ form.addEventListener('submit', (event) => {
     input = getInterpolation(input);
     input = getToInt(input);
     input = getToS(input);
+    input = getThis(input);
     input = getLastElement(input);
     input = getSubString(input);
     input = getHashToObject(input);
